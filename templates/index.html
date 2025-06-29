@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân tích Cảm xúc AI - Chuyên nghiệp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Roboto:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6a0dad; /* Deep Purple */
+            --primary-dark: #4a007b;
+            --secondary-color: #8892b0; /* Light Grayish Blue */
+            --background-start: #E0BBE4; /* Light Lavender */
+            --background-end: #957DAD;   /* Medium Purple */
+            --card-background: #ffffff;
+            --text-color: #2c3e50; /* Dark Blue-Gray */
+            --border-color: #e9ecef;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 8px 20px rgba(0, 0, 0, 0.15);
+            --shadow-strong: 0 15px 40px rgba(0, 0, 0, 0.25);
+            --button-hover-scale: 1.07;
+            --tab-active-color: #6a0dad;
+            --tab-inactive-color: #aaa;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--background-start) 0%, var(--background-end) 100%);
+            color: var(--text-color);
+            font-family: 'Poppins', sans-serif; /* Font mặc định cho toàn bộ trang */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding-top: 80px;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: var(--card-background);
+            box-shadow: var(--shadow-light);
+            padding: 1.5rem 0;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .navbar-brand:hover {
+            color: var(--primary-dark);
+        }
+        .navbar-brand i {
+            font-size: 2rem;
+            color: #ff6f61;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 90%;
+            max-width: 1400px;
+            margin-top: 2.5rem;
+            padding: 30px;
+            gap: 50px;
+        }
+
+        .info-panel {
+            background: var(--card-background);
+            border-radius: 20px;
+            box-shadow: var(--shadow-strong);
+            padding: 40px;
+            width: 450px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+            position: sticky;
+            top: 100px;
+            transition: all 0.4s ease;
+        }
+
+        .current-emotion-card {
+            text-align: center;
+            margin-bottom: 40px;
+            width: 100%;
+            padding-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .emotion-label {
+            font-family: 'Roboto', sans-serif; /* Áp dụng font Roboto cho chữ cảm xúc chính */
+            font-size: 3.5rem;
+            font-weight: 900; /* Đổi thành 900 cho đậm hơn nếu muốn */
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+            letter-spacing: 0.08em;
+        }
+
+        .emotion-emoji {
+            font-size: 7rem;
+            margin-bottom: 25px;
+            line-height: 1;
+            transform: scale(1);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+        }
+        .emotion-emoji:hover {
+            transform: scale(1.2);
+        }
+
+        .confidence-list {
+            width: 100%;
+        }
+
+        .confidence-list h4 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 700;
+            border-bottom: 4px solid var(--primary-color);
+            padding-bottom: 12px;
+            font-size: 1.6rem;
+        }
+
+        .confidence-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .confidence-name {
+            min-width: 110px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .progress-bar-wrapper {
+            flex-grow: 1;
+            height: 16px;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            margin: 0 18px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 8px;
+            transition: width 0.6s ease-out;
+            background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
+        }
+
+        .confidence-value {
+            min-width: 80px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        /* --- Tab Styles --- */
+        .tab-navigation {
+            display: flex;
+            width: 100%;
+            background: var(--card-background);
+            border-radius: 15px;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 18px 25px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--tab-inactive-color);
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button.active {
+            color: var(--tab-active-color);
+            border-color: var(--tab-active-color);
+            background-color: rgba(0, 0, 0, 0.03);
+            box-shadow: inset 0 -3px 0 var(--tab-active-color);
+        }
+
+        .tab-button:hover:not(.active) {
+            color: var(--primary-color);
+            background-color: rgba(0, 0, 0, 0.01);
+        }
+
+        .tab-content-area {
+            width: 100%;
+            background: var(--card-background);
+            border-radius: 20px;
+            box-shadow: var(--shadow-strong);
+            padding: 30px;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tab-content-area.active {
+            display: flex; /* Show when active */
+        }
+
+        /* Webcam Tab Specific Styles */
+        .webcam-controls {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        /* START: Action button style update */
+        .action-button {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); /* Blue gradient for webcam button */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            /* margin-top: 20px; -> Removed from here, moved to .webcam-controls if needed */
+        }
+
+        .action-button:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%); /* Darker blue on hover */
+            transform: scale(var(--button-hover-scale));
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .action-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        /* END: Action button style update */
+
+
+        .webcam-video-container {
+            position: relative;
+            background: #000;
+            border-radius: 20px;
+            box-shadow: var(--shadow-strong);
+            overflow: hidden;
+            display: flex; /* Changed from inline-block to flex for better centering */
+            justify-content: center;
+            align-items: center;
+            width: 100%; /* Will take full width of its parent */
+            max-width: 950px; /* Giữ nguyên 950px */
+            max-height: 700px; /* Giữ nguyên 700px */
+            aspect-ratio: 16 / 9;
+            border: 6px solid transparent;
+            transition: border-color 0.6s ease-in-out, box-shadow 0.6s ease-in-out;
+            min-height: 200px; /* To prevent collapse before stream loads */
+            color: #fff; /* For "Webcam loading..." text */
+            font-size: 1.2rem;
+        }
+        /* Placeholder for webcam stream when not active/loading */
+        .webcam-video-container.loading::before {
+            content: "Đang tải webcam...";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+        .webcam-video-container.loading img {
+            opacity: 0; /* Hide actual img while loading */
+        }
+
+
+        .webcam-video-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain; /* Đảm bảo ảnh không bị cắt, phù hợp với container */
+        }
+
+        .flash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            opacity: 0;
+            z-index: 10;
+            transition: opacity 0.1s ease-in-out;
+        }
+        .flash.active {
+            opacity: 1;
+            transition: opacity 0.1s ease-in-out;
+        }
+
+        /* Image Upload Tab Specific Styles */
+        .image-upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 40px;
+            border: 3px dashed var(--primary-color);
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .image-upload-area:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-color: var(--primary-dark);
+        }
+
+        .image-upload-area i {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .image-upload-area p {
+            font-size: 1.3rem;
+            color: var(--text-color);
+            text-align: center;
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .analyze-button {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin-top: 20px;
+        }
+
+        .analyze-button:hover {
+            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+            transform: scale(var(--button-hover-scale));
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .analyze-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .analyzed-image-display {
+            position: relative;
+            background: #000;
+            border-radius: 20px;
+            box-shadow: var(--shadow-strong);
+            overflow: hidden;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 950px; /* Giữ nguyên 950px */
+            max-height: 700px; /* Giữ nguyên 700px */
+            aspect-ratio: 16 / 9;
+            border: 6px solid transparent;
+            transition: border-color 0.6s ease-in-out, box-shadow 0.6s ease-in-out;
+            margin-top: 30px;
+            min-height: 200px;
+            color: #fff; /* For "No image selected" or "Analyzing..." text */
+            font-size: 1.2rem;
+        }
+        /* Placeholder for analyzed image when not active/loading */
+        .analyzed-image-display.placeholder::before {
+            content: "Vui lòng chọn ảnh để phân tích";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+        .analyzed-image-display.placeholder img {
+            opacity: 0; /* Hide actual img when placeholder is active */
+        }
+
+
+        .analyzed-image-display img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain; /* Đảm bảo ảnh không bị cắt, phù hợp với container */
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+            border-radius: 20px;
+            z-index: 100;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            width: 100%;
+            max-width: 850px;
+            text-align: center;
+            display: none;
+        }
+
+        /* Glow effects (re-used for both webcam and analyzed image) */
+        .glow-happy { border-color: #FFEA00; box-shadow: 0 0 45px rgba(255, 234, 0, 0.9); }
+        .glow-sad { border-color: #00BFFF; box-shadow: 0 0 45px rgba(0, 191, 255, 0.9); }
+        .glow-angry { border-color: #FF0000; box-shadow: 0 0 45px rgba(255, 0, 0, 0.9); }
+        .glow-fear { border-color: #800080; box-shadow: 0 0 45px rgba(128, 0, 128, 0.9); }
+        .glow-neutral { border-color: #808080; box-shadow: 0 0 45px rgba(128, 128, 128, 0.9); }
+        .glow-surprise { border-color: #00FF00; box-shadow: 0 0 45px rgba(0, 255, 0, 0.9); }
+        .glow-disgust { border-color: #FF4500; box-shadow: 0 0 45px rgba(255, 69, 0, 0.9); }
+
+        /* Progress Bar Colors */
+        .progress-bar.happy { background: linear-gradient(to right, #FFEA00, #FFD700); }
+        .progress-bar.sad { background: linear-gradient(to right, #00BFFF, #1E90FF); }
+        .progress-bar.angry { background: linear-gradient(to right, #FF0000, #DC143C); }
+        .progress-bar.fear { background: linear-gradient(to right, #800080, #9932CC); }
+        .progress-bar.neutral { background: linear-gradient(to right, #808080, #A9A9A9); }
+        .progress-bar.surprise { background: linear-gradient(to right, #00FF00, #32CD32); }
+        .progress-bar.disgust { background: linear-gradient(to right, #FF4500, #FF6347); }
+
+        footer {
+            background: var(--text-color);
+            color: #fff;
+            text-align: center;
+            padding: 1.8rem 0;
+            width: 100%;
+            margin-top: auto;
+            font-size: 1rem;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+                align-items: center;
+                width: 95%;
+                margin-top: 2rem;
+                padding: 20px;
+            }
+            .info-panel {
+                width: 100%;
+                max-width: 500px;
+                margin-bottom: 30px;
+                position: static;
+                padding: 30px;
+            }
+            .webcam-video-container, .analyzed-image-display {
+                width: 100%;
+                max-width: 600px; /* Adjust for smaller screens */
+                border-radius: 15px;
+            }
+            .emotion-label {
+                font-size: 2.8rem;
+            }
+            .emotion-emoji {
+                font-size: 6rem;
+            }
+            .confidence-list h4 {
+                font-size: 1.4rem;
+            }
+            .webcam-controls .action-button, .analyze-button {
+                padding: 12px 25px;
+                font-size: 1.1rem;
+            }
+            .tab-navigation {
+                flex-direction: column;
+            }
+            .tab-button {
+                border-bottom: none;
+                border-left: 3px solid transparent;
+            }
+            .tab-button.active {
+                box-shadow: none;
+                border-color: var(--tab-active-color);
+            }
+        }
+        @media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1.8rem;
+                gap: 10px;
+            }
+            .navbar-brand i {
+                font-size: 1.5rem;
+            }
+            .main-content {
+                padding: 15px;
+                margin-top: 1.5rem;
+            }
+            .info-panel {
+                padding: 25px;
+            }
+            .emotion-label {
+                font-size: 2.2rem;
+            }
+            .emotion-emoji {
+                font-size: 5rem;
+            }
+            .confidence-item {
+                font-size: 1rem;
+                margin-bottom: 15px;
+            }
+            .progress-bar-wrapper {
+                height: 12px;
+            }
+            .webcam-controls .action-button, .analyze-button {
+                font-size: 1rem;
+                padding: 10px 20px;
+            }
+            .image-upload-area p {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container-fluid justify-content-center">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-magic"></i> Phân tích Cảm xúc AI
+            </a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="info-panel">
+            <div class="current-emotion-card">
+                <p class="mb-2" style="font-size: 1.2rem; color: var(--secondary-color);">Cảm xúc nổi bật:</p>
+                <h2 id="emotion-label" class="emotion-label">Chưa có dữ liệu</h2>
+                <div id="emotion-emoji" class="emotion-emoji" title="Cảm xúc nổi bật">🤔</div>
+            </div>
+
+            <div class="confidence-list">
+                <h4 class="mb-3">Tất cả cảm xúc</h4>
+                <div class="confidence-item">
+                    <span class="confidence-name">Angry:</span>
+                    <div class="progress-bar-wrapper"><div class="progress-bar angry" style="width: 0%;"></div></div>
+                    <span class="confidence-value">0.00%</span>
+                </div>
+                <div class="confidence-item">
+                    <span class="confidence-name">Disgust:</span>
+                    <div class="progress-bar-wrapper"><div class="progress-bar disgust" style="width: 0%;"></div></div>
+                    <span class="confidence-value">0.00%</span>
+                </div>
+                <div class="confidence-item">
+                    <span class="confidence-name">Fear:</span>
+                    <div class="progress-bar-wrapper"><div class="progress-bar fear" style="width: 0%;"></div></div>
+                    <span class="confidence-value">0.00%</span>
+                </div>
+                <div class="confidence-item">
+                    <span class="confidence-name">Happy:</span>
+                    <div class="progress-bar-wrapper"><div class="progress-bar happy" style="width: 0%;"></div></div>
+                    <span class="confidence-value">0.00%</span>
+                </div>
+                <div class="confidence-item">
+                    <span class="confidence-name">Neutral:</span>
+                    <div class="progress-bar-wrapper"><div class="progress-bar neutral" style="width: 100%;"></div></div>
+                    <span class="confidence-value">0.00%</span>
+                </div>
+                <div class="confidence-item">
+                    <span class="confidence-name">Sad:</span>
+                    <div class="progress-bar-wrapper"><div class="progress-bar sad" style="width: 0%;"></div></div>
+                    <span class="confidence-value">0.00%</span>
+                </div>
+                <div class="confidence-item">
+                    <span class="confidence-name">Surprise:</span>
+                    <div class="progress-bar-wrapper"><div class="progress-bar surprise" style="width: 0%;"></div></div>
+                    <span class="confidence-value">0.00%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column align-items-center flex-grow-1">
+            <div class="tab-navigation">
+                <button class="tab-button active" data-tab="webcam-tab">
+                    <i class="fas fa-video"></i> Phân tích Webcam
+                </button>
+                <button class="tab-button" data-tab="image-tab">
+                    <i class="fas fa-image"></i> Phân tích Ảnh
+                </button>
+            </div>
+
+            <div id="webcam-tab" class="tab-content-area active">
+                <div id="webcam-video-container" class="webcam-video-container glow-neutral loading">
+                    <div class="flash" id="webcam-flash-effect"></div>
+                    <img id="webcam-stream-img" src="" alt="Webcam Stream">
+                </div>
+                <div class="webcam-controls">
+                    <button id="capture-webcam-button" class="action-button">
+                        <i class="fas fa-camera"></i> Chụp Ảnh Khoảnh Khắc
+                    </button>
+                </div>
+                <div id="webcam-error-message" class="error-message"></div>
+            </div>
+
+            <div id="image-tab" class="tab-content-area">
+                <div class="image-upload-area" id="image-upload-area">
+                    <input type="file" id="file-input" accept="image/*">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Kéo & thả ảnh vào đây hoặc click để chọn ảnh</p>
+                </div>
+                <button id="analyze-button" class="analyze-button" disabled>
+                    <i class="fas fa-chart-bar"></i> Phân tích Ảnh
+                </button>
+
+                <div id="loading-overlay" class="loading-overlay" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>Đang phân tích ảnh...</p>
+                </div>
+
+                <div id="image-error-message" class="error-message"></div>
+
+                <div id="analyzed-image-display" class="analyzed-image-display glow-neutral placeholder">
+                    <img id="analyzed-image" src="#" alt="Ảnh đã phân tích">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 Phân tích Cảm xúc AI. Mọi quyền được bảo lưu.</p>
+    </footer>
+
+    <script>
+        const emotionLabels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surprise'];
+        const emojiMap = {
+            "Happy": "😃",
+            "Sad": "😢",
+            "Angry": "😡",
+            "Fear": "😨",
+            "Neutral": "😐",
+            "Surprise": "😲",
+            "Disgust": "🤢"
+        };
+        const glowMap = {
+            "Happy": "glow-happy",
+            "Sad": "glow-sad",
+            "Angry": "glow-angry",
+            "Fear": "glow-fear",
+            "Neutral": "glow-neutral",
+            "Surprise": "glow-surprise",
+            "Disgust": "glow-disgust"
+        };
+
+        // --- UI Elements ---
+        const emotionLabelElement = document.getElementById("emotion-label");
+        const emotionEmojiElement = document.getElementById("emotion-emoji");
+        const confidenceListContainer = document.querySelector('.confidence-list');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const webcamErrorMessageDiv = document.getElementById('webcam-error-message');
+        const imageErrorMessageDiv = document.getElementById('image-error-message');
+
+        // Webcam elements
+        const webcamTabContent = document.getElementById('webcam-tab');
+        const webcamStreamImg = document.getElementById('webcam-stream-img');
+        const webcamVideoContainer = document.getElementById('webcam-video-container');
+        const webcamCaptureButton = document.getElementById('capture-webcam-button');
+        const webcamFlashEffect = document.getElementById('webcam-flash-effect');
+
+        // Image upload elements
+        const fileInput = document.getElementById('file-input');
+        const analyzeButton = document.getElementById('analyze-button');
+        const imageUploadArea = document.getElementById('image-upload-area');
+        const analyzedImageDisplay = document.getElementById('analyzed-image-display');
+        const analyzedImage = document.getElementById('analyzed-image');
+
+        const tabButtons = document.querySelectorAll('.tab-button');
+
+        let webcamEmotionIntervalId = null; // To store interval for webcam emotion data updates
+        let selectedFile = null; // For image upload
+
+
+        // --- Helper Functions ---
+        function updateEmotionDisplay(emotionData) {
+            const dominantEmotion = emotionData.emotion;
+            const allConfidences = emotionData.all_confidences;
+
+            emotionLabelElement.textContent = dominantEmotion;
+            emotionEmojiElement.textContent = emojiMap.hasOwnProperty(dominantEmotion) ? emojiMap[dominantEmotion] : "🤔";
+
+            confidenceListContainer.innerHTML = '<h4 class="mb-3">Tất cả cảm xúc</h4>';
+            emotionLabels.forEach(label => {
+                const confidence = (allConfidences[label] || 0) * 100;
+                const confidenceItemHtml = `
+                    <div class="confidence-item">
+                        <span class="confidence-name">${label}:</span>
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar ${label.toLowerCase()}" style="width: ${confidence.toFixed(2)}%;"></div>
+                        </div>
+                        <span class="confidence-value">${confidence.toFixed(2)}%</span>
+                    </div>
+                `;
+                confidenceListContainer.insertAdjacentHTML('beforeend', confidenceItemHtml);
+            });
+        }
+
+        function setGlowEffect(containerElement, emotion) {
+            Object.values(glowMap).forEach(cls => containerElement.classList.remove(cls));
+            if (glowMap[emotion]) {
+                containerElement.classList.add(glowMap[emotion]);
+            } else {
+                containerElement.classList.add('glow-neutral');
+            }
+        }
+
+        function resetAllEmotionDisplays() {
+            emotionLabelElement.textContent = "Chưa có dữ liệu";
+            emotionEmojiElement.textContent = "🤔";
+            confidenceListContainer.innerHTML = '<h4 class="mb-3">Tất cả cảm xúc</h4>';
+            emotionLabels.forEach(label => {
+                const confidenceItemHtml = `
+                    <div class="confidence-item">
+                        <span class="confidence-name">${label}:</span>
+                        <div class="progress-bar-wrapper"><div class="progress-bar ${label.toLowerCase()}" style="width: 0%;"></div></div>
+                        <span class="confidence-value">0.00%</span>
+                    </div>
+                `;
+                confidenceListContainer.insertAdjacentHTML('beforeend', confidenceItemHtml);
+            });
+            // Reset glow for both potential containers
+            setGlowEffect(webcamVideoContainer, 'Neutral');
+            setGlowEffect(analyzedImageDisplay, 'Neutral');
+
+            // Reset specific webcam display aspects
+            webcamStreamImg.src = ''; // Clear stream src
+            webcamVideoContainer.classList.add('loading'); // Show loading text for webcam
+            webcamErrorMessageDiv.style.display = 'none'; // Clear webcam errors
+
+            // Reset specific image display aspects
+            analyzedImage.src = '#'; // Clear image src
+            analyzedImageDisplay.style.display = 'none'; // Hide image display
+            analyzedImageDisplay.classList.add('placeholder'); // Add placeholder for image tab
+            imageErrorMessageDiv.style.display = 'none'; // Clear image errors
+            selectedFile = null; // Clear selected file
+            analyzeButton.disabled = true; // Disable analyze button
+            fileInput.value = ''; // Clear file input element
+        }
+
+        function showMessage(element, message, isError = true) {
+            console.log("showMessage called for element:", element.id, "with message:", message, "isError:", isError);
+            element.textContent = message;
+            element.style.display = 'block';
+            element.style.color = isError ? '#dc3545' : '#28a745';
+            element.style.backgroundColor = isError ? '#f8d7da' : '#d4edda';
+            element.style.borderColor = isError ? '#f5c6cb' : '#c3e6cb';
+        }
+
+        function hideMessage(element) {
+            element.style.display = 'none';
+        }
+
+        // --- Webcam Tab Logic ---
+        function startWebcamStream() {
+            console.log("Attempting to start webcam stream...");
+            webcamVideoContainer.classList.add('loading'); // Show "Đang tải webcam..."
+            webcamStreamImg.src = ''; // Clear existing stream to force reload
+
+            fetch('/start_webcam')
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => Promise.reject(err));
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Webcam start API response:", data.status);
+                    webcamStreamImg.src = "{{ url_for('video_feed') }}"; // Set src to start video stream
+                    // Remove loading class after a brief moment to allow stream to start rendering
+                    setTimeout(() => {
+                        webcamVideoContainer.classList.remove('loading');
+                    }, 500);
+                    hideMessage(webcamErrorMessageDiv); // Hide any previous error
+                    if (webcamEmotionIntervalId) clearInterval(webcamEmotionIntervalId);
+                    webcamEmotionIntervalId = setInterval(fetchWebcamEmotionData, 1000); // Start fetching emotion data
+                })
+                .catch(error => {
+                    console.error('Error starting webcam (frontend):', error);
+                    showMessage(webcamErrorMessageDiv, 'Không thể khởi động webcam. Vui lòng kiểm tra quyền truy cập hoặc kết nối.', true);
+                    webcamStreamImg.src = ''; // Clear stream image on error
+                    webcamVideoContainer.classList.remove('loading'); // Hide loading message
+                    resetAllEmotionDisplays(); // Reset emotion data on the left panel
+                });
+        }
+
+        function stopWebcamStream() {
+            console.log("Attempting to stop webcam stream...");
+            if (webcamEmotionIntervalId) {
+                clearInterval(webcamEmotionIntervalId);
+                webcamEmotionIntervalId = null;
+            }
+            fetch('/stop_webcam')
+                .then(response => response.json())
+                .then(data => console.log("Webcam stop API response:", data.status))
+                .catch(error => console.error('Error stopping webcam (frontend):', error));
+            webcamStreamImg.src = ''; // Clear stream to stop video requests
+            webcamVideoContainer.classList.add('loading'); // Show loading state for next time
+            resetAllEmotionDisplays(); // Reset emotion data when stopping webcam
+        }
+
+        function fetchWebcamEmotionData() {
+            fetch('/webcam_emotion_data')
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => Promise.reject(err));
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.emotion) { // Ensure data is valid
+                        updateEmotionDisplay(data);
+                        setGlowEffect(webcamVideoContainer, data.emotion);
+                    } else {
+                        console.log("No valid emotion data from webcam (perhaps no face detected).");
+                        // If no face detected, the backend sends "Neutral" with 0 confidences.
+                        // The resetAllEmotionDisplays() handles the initial "Chưa có dữ liệu".
+                        // If stream is active but no face, it will just show Neutral/0%
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching webcam emotion data:', error);
+                    // This error might occur if backend crashes or stream is broken
+                    showMessage(webcamErrorMessageDiv, 'Mất kết nối với webcam hoặc lỗi phân tích dữ liệu.', true);
+                    stopWebcamStream(); // Consider stopping if persistent
+                });
+        }
+
+        webcamCaptureButton.addEventListener('click', function() {
+            console.log("Capture button clicked.");
+            webcamFlashEffect.classList.add('active');
+            setTimeout(() => {
+                webcamFlashEffect.classList.remove('active');
+            }, 200);
+
+            fetch('/capture_webcam_frame')
+                .then(response => {
+                    if (response.ok) return response.blob();
+                    throw new Error('Network response was not ok.');
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `emotion_snapshot_${new Date().toISOString().slice(0,19).replace(/[-T:]/g,"")}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    showMessage(webcamErrorMessageDiv, 'Ảnh đã được chụp và tải về!', false);
+                    setTimeout(() => hideMessage(webcamErrorMessageDiv), 3000);
+                })
+                .catch(error => {
+                    console.error('Lỗi khi chụp ảnh:', error);
+                    showMessage(webcamErrorMessageDiv, 'Không thể chụp ảnh. Vui lòng thử lại.', true);
+                });
+        });
+
+        // --- Image Upload Tab Logic ---
+        fileInput.addEventListener('change', function(event) {
+            console.log("File input changed.");
+            if (event.target.files.length > 0) {
+                selectedFile = event.target.files[0];
+                analyzeButton.disabled = false;
+                hideMessage(imageErrorMessageDiv); // Ẩn thông báo lỗi cũ khi chọn ảnh mới
+
+                analyzedImageDisplay.classList.remove('placeholder'); // Remove placeholder
+                analyzedImageDisplay.style.display = 'flex'; // Show the container for preview
+
+                // Show local image preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    analyzedImage.src = e.target.result;
+                };
+                reader.readAsDataURL(selectedFile);
+                // DO NOT CALL resetAllEmotionDisplays() here. It clears selectedFile.
+            } else {
+                selectedFile = null;
+                analyzeButton.disabled = true;
+                analyzedImage.src = '#'; // Clear src
+                analyzedImageDisplay.style.display = 'none'; // Hide image display if no file
+                analyzedImageDisplay.classList.add('placeholder'); // Add placeholder back
+                resetAllEmotionDisplays(); // Reset emotion data on the left panel (if no file is chosen after selection)
+            }
+        });
+
+        analyzeButton.addEventListener('click', function() {
+            console.log("Analyze Image button clicked.");
+            if (!selectedFile) {
+                showMessage(imageErrorMessageDiv, "Vui lòng chọn một ảnh để phân tích.", true);
+                return;
+            }
+
+            loadingOverlay.style.display = 'flex';
+            hideMessage(imageErrorMessageDiv); // Ẩn thông báo lỗi khi bắt đầu phân tích
+            // KHÔNG ẩn analyzedImageDisplay hay analyzedImage.src ở đây để giữ ảnh gốc hiển thị
+            analyzedImageDisplay.classList.remove('placeholder'); // Loại bỏ placeholder khi phân tích
+
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+
+            fetch('/analyze_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => Promise.reject(err));
+                }
+                return response.json();
+            })
+            .then(data => {
+                loadingOverlay.style.display = 'none';
+                if (data.success) {
+                    updateEmotionDisplay(data); // Update left panel
+                    analyzedImage.src = 'data:image/jpeg;base64,' + data.image_data;
+                    analyzedImageDisplay.style.display = 'flex';
+                    setGlowEffect(analyzedImageDisplay, data.emotion); // Set glow for analyzed image
+                    showMessage(imageErrorMessageDiv, 'Phân tích ảnh thành công!', false);
+                    setTimeout(() => hideMessage(imageErrorMessageDiv), 3000);
+                } else {
+                    // Xử lý lỗi khi backend trả về success: false (ví dụ: không tìm thấy khuôn mặt)
+                    loadingOverlay.style.display = 'none'; // Ẩn loading
+                    const errorMessageText = data.error || "Có lỗi xảy ra trong quá trình phân tích.";
+                    console.log("Error from server (data.success=false). Proposed message:", errorMessageText);
+
+                    // Reset chỉ phần thông tin cảm xúc bên trái
+                    emotionLabelElement.textContent = "Chưa có dữ liệu";
+                    emotionEmojiElement.textContent = "🤔";
+                    confidenceListContainer.innerHTML = '<h4 class="mb-3">Tất cả cảm xúc</h4>';
+                    emotionLabels.forEach(label => {
+                        const confidenceItemHtml = `
+                            <div class="confidence-item">
+                                <span class="confidence-name">${label}:</span>
+                                <div class="progress-bar-wrapper"><div class="progress-bar ${label.toLowerCase()}" style="width: 0%;"></div></div>
+                                <span class="confidence-value">0.00%</span>
+                            </div>
+                        `;
+                        confidenceListContainer.insertAdjacentHTML('beforeend', confidenceItemHtml);
+                    });
+                    setGlowEffect(analyzedImageDisplay, 'Neutral'); // Reset glow cho ảnh
+
+                    // Đảm bảo ảnh vẫn hiển thị (đã được thiết lập bởi file input change)
+                    analyzedImageDisplay.style.display = 'flex';
+                    analyzedImageDisplay.classList.remove('placeholder');
+
+                    // Hiển thị thông báo lỗi
+                    showMessage(imageErrorMessageDiv, errorMessageText, true);
+                }
+            })
+            .catch(error => {
+                // Xử lý lỗi kết nối hoặc phản hồi không mong muốn (ví dụ: status 400)
+                loadingOverlay.style.display = 'none';
+                const errorMessageText = error.error || "Lỗi kết nối hoặc phản hồi không mong muốn từ server: " + (error.message || JSON.stringify(error));
+                console.log("Error caught in analyze_image fetch. Proposed message:", errorMessageText);
+
+                // Reset chỉ phần thông tin cảm xúc bên trái
+                emotionLabelElement.textContent = "Chưa có dữ liệu";
+                emotionEmojiElement.textContent = "🤔";
+                confidenceListContainer.innerHTML = '<h4 class="mb-3">Tất cả cảm xúc</h4>';
+                emotionLabels.forEach(label => {
+                    const confidenceItemHtml = `
+                        <div class="confidence-item">
+                            <span class="confidence-name">${label}:</span>
+                            <div class="progress-bar-wrapper"><div class="progress-bar ${label.toLowerCase()}" style="width: 0%;"></div></div>
+                            <span class="confidence-value">0.00%</span>
+                        </div>
+                    `;
+                    confidenceListContainer.insertAdjacentHTML('beforeend', confidenceItemHtml);
+                });
+                setGlowEffect(analyzedImageDisplay, 'Neutral'); // Reset glow cho ảnh
+
+                // Đảm bảo ảnh vẫn hiển thị (đã được thiết lập bởi file input change)
+                analyzedImageDisplay.style.display = 'flex';
+                analyzedImageDisplay.classList.remove('placeholder');
+
+                // Hiển thị thông báo lỗi
+                showMessage(imageErrorMessageDiv, errorMessageText, true);
+
+                console.error('Full Error Object:', error);
+            });
+        });
+
+        // Drag and Drop functionality
+        imageUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            imageUploadArea.style.borderColor = "var(--primary-dark)";
+            imageUploadArea.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+        });
+
+        imageUploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            imageUploadArea.style.borderColor = "var(--primary-color)";
+            imageUploadArea.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+        });
+
+        imageUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            imageUploadArea.style.borderColor = "var(--primary-color)";
+            imageUploadArea.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                if (file.type.startsWith('image/')) {
+                    fileInput.files = e.dataTransfer.files;
+                    fileInput.dispatchEvent(new Event('change'));
+                } else {
+                    showMessage(imageErrorMessageDiv, "Chỉ chấp nhận file ảnh. Vui lòng thử lại.", true);
+                }
+            }
+        });
+
+        imageUploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+
+        // --- Tab Switching Logic ---
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+                console.log(`Switching to tab: ${targetTab}`);
+
+                // Update active button styles
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                // Show/hide tab content
+                document.querySelectorAll('.tab-content-area').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(targetTab).classList.add('active');
+
+                // Manage webcam stream based on active tab
+                if (targetTab === 'webcam-tab') {
+                    startWebcamStream(); // Start webcam and its data interval
+                    hideMessage(imageErrorMessageDiv); // Hide image tab errors
+                } else { // Switching to image tab
+                    stopWebcamStream(); // Stop webcam and its data interval
+                    hideMessage(webcamErrorMessageDiv); // Hide webcam errors
+                }
+                resetAllEmotionDisplays(); // Reset emotion data on the left panel for the new tab
+            });
+        });
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize the UI to a clean state
+            resetAllEmotionDisplays();
+            // Simulate click on the default active tab (Webcam) to trigger its setup
+            // This ensures webcam starts and UI updates on load.
+            document.querySelector('.tab-button.active').click();
+        });
+    </script>
+
+</body>
+</html>
